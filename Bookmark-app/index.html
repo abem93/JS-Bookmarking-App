@@ -82,6 +82,7 @@
       .bookmark{
         display: block;
         background: #FFF;
+        position: relative;
         color: #999;
         padding: 20px;
         transition: 0.3s ease all;
@@ -99,6 +100,31 @@
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;
         border-bottom: 0;
+      }
+      .bookmark .img{
+        background-color: #DDD;
+        border-radius: 3px;
+        background-image: url();
+        background-size: cover;
+        width: 80px;
+        height: 60px;
+        margin-right: 20px;
+      }
+      .bookmark .title {
+        display: flex;
+        align-items: center;
+      }
+      .bookmark .glyphicon-remove{
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: #EEE;
+        font-size: 12px;
+        transition: 0.3s ease color;
+        cursor: pointer;
+      }
+      .bookmark:hover .glyphicon-remove {
+        color: #AAA;
       }
 
 
@@ -184,10 +210,12 @@
       }
 
       function fillBookmarksList(bookmarks = []){
-        const bookmarksHtml = bookmarks.map((bookmark) => {
+        const bookmarksHtml = bookmarks.map((bookmark, i) => {
           return `
-          <a href="#" class="bookmark">
-            ${bookmark.title}
+          <a href="#" class="bookmark" data-id="${i}">
+            <div class="img"></div>
+            <div class="title">${bookmark.title}</div>
+            <span class="glyphicon glyphicon-remove"></span>
             </a>
             `;
         });
@@ -203,11 +231,28 @@
         bookmarksList.innerHTML = bookmarksHtml;
       }
 
+
+      function removeBookmark(e){
+        if(!e.target.matches('.glyphicon-remove')) return;
+
+        const index = e.target.parentNode.dataset.id;
+        bookmarks.splice(index, 1);
+        fillBookmarksList(bookmarks);
+        storeBookmarks(bookmarks);
+
+        // find the index
+        // remove from the bookmarks using splice
+        // fill the list
+        // store back to local storage
+      }
+
+
       function storeBookmarks(bookmark = []){
         localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
       }
 
       bookmarkForm.addEventListener('submit', createBookmark)
+      bookmarksList.addEventListener('click', removeBookmark)
     </script>
     
     </body>
