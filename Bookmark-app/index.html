@@ -106,7 +106,8 @@
         border-radius: 3px;
         background-image: url();
         background-size: cover;
-        width: 80px;
+        background-position: top center;
+        width: 120px;
         height: 60px;
         margin-right: 20px;
       }
@@ -165,7 +166,7 @@
       }
 
       input.addEventListener('focus', showFloater);
-      input.addEventListener('focusout', closeFloater);
+      //input.addEventListener('focusout', closeFloater);
       overlay.addEventListener('click', closeFloater);
 
       // =================================
@@ -173,27 +174,42 @@
 
 
       const bookmarksList = document.querySelector('.bookmarks-list');
-      const bookmarkForm = document.querySelector('.bookmark-form');
+      const bookmarkForm  = document.querySelector('.bookmark-form');
       const bookmarkInput = bookmarkForm.querySelector('input[type=text]');
       const bookmarks     = JSON.parse(localStorage.getItem('bookmarks'))|| [];
-
-
+      const apiUrl        = 'https://opengraph.io/api/1.1/site/';
+      const appId         = 'xxxxxxxxxxxxxxxxxxxxx';
+      
+      
       fillBookmarksList(bookmarks);
 
       function createBookmark(e){
         e.preventDefault();
 
+        if(!bookmarkInput.value){
+          alert('We Need Info!');
+          return
+        };
+        const url = encodeURIComponent(bookmarkInput.value);
 
         //add a new bookmark tro the bookmarks
-        const title = bookmarkInput.value;
-        const bookmark = {
-          title: title,
-        };
-        bookmarks.push(bookmark)
-        fillBookmarksList(bookmarks);
-        storeBookmarks(bookmarks);
-        bookmarkForm.reset();
-
+        fetch(apiUrl + url + '?app_id=' + appId)
+        .then(response => response.json())
+        .then(data => {
+          const title = bookmarkInput.value;
+          const bookmark = {
+            title: data.hybridGraph.title,
+            image: data.hybridGraph.image,
+            link: data.hybridGraph.url
+          };
+          bookmarks.push(bookmark)
+          fillBookmarksList(bookmarks);
+          storeBookmarks(bookmarks);
+          bookmarkForm.reset();
+        })
+        .catch(error =>{
+          alert('There was a problem getting info!')
+        })
 
         console.table(bookmarks)
 
@@ -212,8 +228,8 @@
       function fillBookmarksList(bookmarks = []){
         const bookmarksHtml = bookmarks.map((bookmark, i) => {
           return `
-          <a href="#" class="bookmark" data-id="${i}">
-            <div class="img"></div>
+          <a href="${bookmark.link}" class="bookmark" data-id="${i}">
+            <div class="img" style="background-image:url('${bookmark.image}')"></div>
             <div class="title">${bookmark.title}</div>
             <span class="glyphicon glyphicon-remove"></span>
             </a>
